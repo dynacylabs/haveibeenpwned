@@ -14,6 +14,26 @@ A comprehensive Python library for the [Have I Been Pwned](https://haveibeenpwne
 - **Error Handling**: Comprehensive exception hierarchy
 - **Rate Limiting**: Automatic handling of rate limit responses
 
+## Table of Contents
+
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Usage Examples](#usage-examples)
+  - [Breaches](#breaches)
+  - [Domain Search](#domain-search)
+  - [Pastes](#pastes)
+  - [Stealer Logs](#stealer-logs)
+  - [Pwned Passwords](#pwned-passwords)
+  - [Subscription Status](#subscription-status)
+- [Advanced Usage](#advanced-usage)
+- [Error Handling](#error-handling)
+- [Models](#models)
+- [Testing](#testing)
+- [Contributing](#contributing)
+- [API Reference](#api-reference)
+- [Requirements](#requirements)
+- [License](#license)
+
 ## Installation
 
 ```bash
@@ -383,6 +403,146 @@ This library uses the [Have I Been Pwned API](https://haveibeenpwned.com/API/v3)
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Testing
+
+The library includes a comprehensive test suite with both unit tests (mocked) and integration tests (live API).
+
+### Running Tests
+
+```bash
+# Install test dependencies
+pip install -r requirements-test.txt
+
+# Run all tests
+pytest
+
+# Run only unit tests (no API key needed)
+pytest -m unit
+
+# Run only integration tests (requires HIBP_API_KEY)
+export HIBP_API_KEY="your-api-key"
+pytest -m integration
+
+# Run with coverage
+pytest --cov=haveibeenpwned --cov-report=html
+```
+
+### Test Coverage
+
+The test suite includes:
+- ✅ **Client & HTTP**: Request handling, error responses, timeouts
+- ✅ **Models**: Breach, Paste, Subscription, SubscribedDomain
+- ✅ **Breaches API**: All 7 endpoints with full parameter testing
+- ✅ **Pwned Passwords**: SHA-1, NTLM, padding, k-Anonymity
+- ✅ **Pastes API**: Account paste retrieval
+- ✅ **Stealer Logs API**: Email, website, and domain searches
+- ✅ **Subscription API**: Status retrieval
+- ✅ **Main Interface**: All convenience methods
+
+Target coverage: **90%+**
+
+## API Reference
+
+### Complete Endpoint Coverage
+
+#### Breaches (7 endpoints)
+- `get_account_breaches(account)` - Get all breaches for an account
+- `get_all_breaches()` - Get all breaches in the system
+- `get_breach(name)` - Get a single breach by name
+- `get_latest_breach()` - Get the most recently added breach
+- `get_data_classes()` - Get all data classes
+- `get_domain_breaches(domain)` - Get breached emails for a domain
+- `get_subscribed_domains()` - Get all subscribed domains
+
+#### Pastes (1 endpoint)
+- `get_account_pastes(account)` - Get all pastes for an account
+
+#### Stealer Logs (3 endpoints)
+- `get_stealer_logs_by_email(email)` - Get domains by email
+- `get_stealer_logs_by_website(domain)` - Get emails by website domain
+- `get_stealer_logs_by_email_domain(domain)` - Get aliases by email domain
+
+#### Subscription (1 endpoint)
+- `get_subscription_status()` - Get subscription details
+
+#### Pwned Passwords (no API key required)
+- `is_password_pwned(password)` - Check if password is compromised
+- `search_password_hashes(prefix)` - Search by hash prefix
+
+### Project Structure
+
+```
+haveibeenpwned/
+├── haveibeenpwned/          # Main package
+│   ├── __init__.py          # Package exports
+│   ├── api.py               # Main HIBP interface
+│   ├── breach.py            # Breach endpoints
+│   ├── client.py            # HTTP client
+│   ├── exceptions.py        # Custom exceptions
+│   ├── models.py            # Data models
+│   ├── passwords.py         # Pwned Passwords API
+│   ├── pastes.py            # Pastes endpoints
+│   ├── stealer_logs.py      # Stealer logs endpoints
+│   └── subscription.py      # Subscription endpoints
+├── examples/                # Usage examples
+│   ├── basic_usage.py
+│   ├── complete_demo.py
+│   └── password_checking.py
+├── tests/                   # Test suite
+│   ├── conftest.py
+│   ├── test_api.py
+│   ├── test_breach.py
+│   ├── test_client.py
+│   ├── test_models.py
+│   ├── test_other_endpoints.py
+│   └── test_passwords.py
+├── setup.py                 # Package setup
+├── requirements.txt         # Dependencies
+├── requirements-test.txt    # Test dependencies
+└── README.md                # This file
+```
+
+## Contributing
+
+Contributions are welcome! Please ensure your contributions meet the following requirements:
+
+### Code Quality Standards
+
+- **All tests must pass**: Run `./run_tests.sh all` to verify all tests pass
+- **Code coverage must be >95%**: Run `./run_tests.sh coverage` to check coverage
+- **Follow existing code style**: Match the formatting and patterns used in the codebase
+- **Add tests for new features**: Both unit tests (mocked) and integration tests (live API calls where appropriate)
+- **Update documentation**: Keep README.md and docstrings up to date
+
+### Testing Your Changes
+
+Before submitting a pull request:
+
+```bash
+# Run all tests
+./run_tests.sh all
+
+# Check coverage (must be >95%)
+./run_tests.sh coverage
+
+# Run unit tests only (fast, no API key needed)
+./run_tests.sh unit
+
+# Run live integration tests (requires HIBP_API_KEY)
+export HIBP_API_KEY="your-api-key-here"
+./run_tests.sh live
+```
+
+### Submitting Changes
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/my-new-feature`)
+3. Make your changes with appropriate tests
+4. Ensure all tests pass and coverage is >95%
+5. Commit your changes (`git commit -am 'Add new feature'`)
+6. Push to the branch (`git push origin feature/my-new-feature`)
+7. Create a Pull Request
 
 ## Disclaimer
 

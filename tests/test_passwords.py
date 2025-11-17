@@ -1,13 +1,18 @@
-"""
-Tests for Pwned Passwords API.
+"""Tests for Pwned Passwords API.
 """
 
 import hashlib
 import pytest
 import responses as responses_lib
 
-from haveibeenpwned.passwords import PwnedPasswordsAPI
+from haveibeenpwned.passwords import PwnedPasswordsAPI, MD4_AVAILABLE
 from haveibeenpwned.client import BaseClient
+
+# Skip NTLM tests if MD4 is not available
+requires_md4 = pytest.mark.skipif(
+    not MD4_AVAILABLE,
+    reason="MD4 not available (deprecated/removed in Python 3.9+)"
+)
 
 
 @pytest.mark.unit
@@ -37,10 +42,11 @@ class TestPwnedPasswordsAPIMocked:
         client = BaseClient()
         api = PwnedPasswordsAPI(client)
         
+        # Hash of "VerySecurePassword!2024" starts with 17221
         with responses_lib.RequestsMock() as rsps:
             rsps.add(
                 responses_lib.GET,
-                "https://api.pwnedpasswords.com/range/A94A8",
+                "https://api.pwnedpasswords.com/range/17221",
                 body=sample_password_hash_response,
                 status=200
             )
@@ -49,6 +55,7 @@ class TestPwnedPasswordsAPIMocked:
             count = api.check_password("VerySecurePassword!2024")
             assert count == 0
     
+    @requires_md4
     def test_check_password_ntlm(self, sample_password_hash_response):
         """Test checking password with NTLM hash."""
         client = BaseClient()
@@ -141,6 +148,7 @@ class TestPwnedPasswordsAPIMocked:
         assert hash_result == expected
         assert hash_result == "5BAA61E4C9B93F3F0682250B6CF8331B7EE68FD8"
     
+    @requires_md4
     def test_hash_password_ntlm(self):
         """Test NTLM password hashing."""
         hash_result = PwnedPasswordsAPI.hash_password_ntlm("password")
@@ -180,8 +188,9 @@ class TestPwnedPasswordsAPILive:
         assert suffix in results
         assert results[suffix] > 0
     
+    @requires_md4
     def test_check_password_ntlm_live(self, password_client):
-        """Test checking password with NTLM hash."""
+        """Test NTLM hash check with live API."""
         count = password_client.passwords.check_password("password", use_ntlm=True)
         assert count > 0
     

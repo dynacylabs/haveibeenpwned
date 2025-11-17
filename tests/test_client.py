@@ -16,6 +16,7 @@ from haveibeenpwned.exceptions import (
     ForbiddenError,
     ServiceUnavailableError,
 )
+from tests.conftest import skip_if_no_api_key
 
 
 @pytest.mark.unit
@@ -273,11 +274,104 @@ class TestClientRequests:
         responses_lib.add(
             responses_lib.GET,
             "https://api.pwnedpasswords.com/range/21BD1",
-            body="test response",
+            json={"test": "response"},
             status=200
         )
         
-        client.get("range/21BD1", base_url="https://api.pwnedpasswords.com", include_api_key=False)
+        result = client.get("range/21BD1", base_url="https://api.pwnedpasswords.com", include_api_key=False)
         
         assert len(responses_lib.calls) == 1
         assert responses_lib.calls[0].request.url == "https://api.pwnedpasswords.com/range/21BD1"
+        assert result == {"test": "response"}
+
+
+@pytest.mark.integration
+class TestBaseClientLive:
+    """Live integration tests for BaseClient."""
+    
+    def test_live_request_without_api_key(self):
+        """Test making a live request without API key (public endpoints)."""
+        from tests.conftest import skip_if_no_api_key
+        # This test doesn't actually need the skip, but keeping consistent
+        client = BaseClient(user_agent="hibp-test-suite")
+        
+        # Test public endpoint - get all breaches
+        breaches = client.get("breaches", include_api_key=False)
+        
+        assert breaches is not None
+        assert isinstance(breaches, list)
+        assert len(breaches) > 0
+        assert "Name" in breaches[0]
+    
+    @skip_if_no_api_key()
+    def test_live_request_with_api_key(self):
+        """Test making a live request with API key."""
+        from tests.conftest import LIVE_API_KEY, TEST_ACCOUNT_EXISTS
+        client = BaseClient(api_key=LIVE_API_KEY, user_agent="hibp-test-suite")
+        
+        # Test authenticated endpoint
+        encoded_account = client.url_encode(TEST_ACCOUNT_EXISTS)
+        breaches = client.get(f"breachedaccount/{encoded_account}")
+        
+        assert breaches is not None
+        assert isinstance(breaches, list)
+    
+    def test_live_pwned_passwords_request(self):
+        """Test live request to Pwned Passwords API."""
+        client = BaseClient(user_agent="hibp-test-suite")
+        
+        # Test Pwned Passwords endpoint (no API key needed)
+        response = client.session.get(
+            f"{client.PWNED_PASSWORDS_URL}/range/21BD1",
+            headers=client._get_headers(include_api_key=False),
+            timeout=client.timeout
+        )
+        
+        assert response.status_code == 200
+        assert len(response.text) > 0
+        assert ":" in response.text  # Hash:count format
+    
+    @skip_if_no_api_key()
+    def test_live_headers_sent(self):
+        """Test that correct headers are sent in live requests."""
+        from tests.conftest import LIVE_API_KEY
+        client = BaseClient(api_key=LIVE_API_KEY, user_agent="hibp-live-test")
+        
+        # Make a request and verify headers would be sent
+        headers = client._get_headers(include_api_key=True)
+        
+        assert headers["User-Agent"] == "hibp-live-test"
+        assert headers["hibp-api-key"] == LIVE_API_KEY
+    
+    def test_live_url_encoding(self):
+        """Test URL encoding with live requests."""
+        client = BaseClient(user_agent="hibp-test-suite")
+        
+        # Test encoding special characters
+        encoded = client.url_encode("test+user@example.com")
+        assert "+" not in encoded or encoded.count("+") == 0 or "%2B" in encoded
+        
+        encoded = client.url_encode("test@example.com")
+        assert "@" not in encoded or "%40" in encoded
+    
+    def test_live_not_found_handling(self):
+        """Test handling of 404 responses in live requests."""
+        from haveibeenpwned.exceptions import NotFoundError
+        client = BaseClient(user_agent="hibp-test-suite")
+        
+        # Try to get a breach that doesn't exist
+        with pytest.raises(NotFoundError):
+            client.get("breach/ThisBreachDefinitelyDoesNotExist123456", include_api_key=False)
+    
+    @skip_if_no_api_key()
+    def test_live_authentication_with_invalid_key(self):
+        """Test authentication failure with invalid API key."""
+        from haveibeenpwned.exceptions import AuthenticationError
+        from tests.conftest import TEST_ACCOUNT_EXISTS
+        
+        client = BaseClient(api_key="invalid-key-12345678901234567890", user_agent="hibp-test-suite")
+        encoded_account = client.url_encode(TEST_ACCOUNT_EXISTS)
+        
+        # Should raise authentication error
+        with pytest.raises(AuthenticationError):
+            client.get(f"breachedaccount/{encoded_account}")

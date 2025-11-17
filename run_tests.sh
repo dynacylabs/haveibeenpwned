@@ -1,144 +1,119 @@
-#!/usr/bin/env bash
+#!/bin/bash
 #
-# Test runner script for haveibeenpwned library
+# Test runner script for the haveibeenpwned library.
 #
+# Usage:
+#     ./run_tests.sh              # Run all tests
+#     ./run_tests.sh unit         # Run only unit tests (mocked, fast)
+#     ./run_tests.sh live         # Run only live/integration tests
+#     ./run_tests.sh coverage     # Run with coverage report
+#     ./run_tests.sh quick        # Run unit tests only (same as 'unit')
+#     ./run_tests.sh <file>       # Run specific test file
+#     ./run_tests.sh --help       # Show this help
 
 set -e
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+print_header() {
+    echo ""
+    echo "======================================================================"
+    echo "  $1"
+    echo "======================================================================"
+    echo ""
+}
 
-echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}Have I Been Pwned Test Suite${NC}"
-echo -e "${BLUE}========================================${NC}"
-echo ""
+# Parse arguments
+MODE="${1:-all}"
+
+if [[ "$MODE" == "--help" || "$MODE" == "-h" || "$MODE" == "help" ]]; then
+    sed -n '2,12p' "$0" | sed 's/^# //'
+    exit 0
+fi
 
 # Check if pytest is installed
 if ! command -v pytest &> /dev/null; then
-    echo -e "${RED}Error: pytest is not installed${NC}"
-    echo "Install test dependencies with: pip install -r requirements-test.txt"
+    echo "❌ pytest is not installed!"
+    echo ""
+    echo "Install dependencies:"
+    echo "  pip install -r requirements.txt"
     exit 1
 fi
 
-# Function to run tests
-run_tests() {
-    local mode=$1
-    local markers=$2
-    local description=$3
-    
-    echo -e "${YELLOW}Running ${description}...${NC}"
-    echo ""
-    
-    if [ -n "$markers" ]; then
-        pytest -m "$markers" "$@"
-    else
-        pytest "$@"
-    fi
-    
-    local exit_code=$?
-    echo ""
-    
-    if [ $exit_code -eq 0 ]; then
-        echo -e "${GREEN}✓ ${description} passed${NC}"
-    else
-        echo -e "${RED}✗ ${description} failed${NC}"
-        return $exit_code
-    fi
-    
-    echo ""
-    return 0
-}
+# Check for API key (for live tests)
+if [[ -n "$HIBP_API_KEY" && "$HIBP_API_KEY" != "00000000000000000000000000000000" ]]; then
+    HAS_API_KEY=true
+else
+    HAS_API_KEY=false
+fi
 
-# Parse command line arguments
-MODE=${1:-all}
-
-case $MODE in
-    mock|unit)
-        echo -e "${BLUE}Running unit tests with mocked API...${NC}"
-        echo ""
-        run_tests "mock" "unit" "Unit Tests (Mocked)"
+# Build pytest command based on mode
+case "$MODE" in
+    unit|mock|mocked|quick)
+        print_header "Running Unit Tests (Mocked)"
+        pytest -m unit -v
         ;;
     
-    live|integration)
-        echo -e "${BLUE}Running integration tests with live API...${NC}"
-        echo -e "${YELLOW}Note: Set HIBP_API_KEY environment variable for full testing${NC}"
-        echo ""
-        run_tests "live" "integration" "Integration Tests (Live API)"
+    live|integration|int)
+        print_header "Running Integration Tests (Live API)"
+        if [[ "$HAS_API_KEY" == "false" ]]; then
+            echo "⚠️  Warning: No HIBP_API_KEY set. Some tests will be skipped."
+            echo "Set API key: export HIBP_API_KEY='your-api-key'"
+            echo ""
+        fi
+        pytest -m integration -v
         ;;
     
     coverage|cov)
-        echo -e "${BLUE}Running all tests with coverage...${NC}"
-        echo ""
-        pytest --cov=haveibeenpwned \
-               --cov-report=html \
-               --cov-report=term-missing \
-               --cov-report=xml \
-               -v
-        
-        echo ""
-        echo -e "${GREEN}✓ Coverage report generated${NC}"
-        echo "  - HTML: htmlcov/index.html"
-        echo "  - XML: coverage.xml"
-        ;;
-    
-    quick)
-        echo -e "${BLUE}Running quick tests (unit only, no coverage)...${NC}"
-        echo ""
-        pytest -m unit -v --tb=short
+        print_header "Running All Tests with Coverage"
+        if [[ "$HAS_API_KEY" == "false" ]]; then
+            echo "⚠️  Note: Integration tests will be skipped without HIBP_API_KEY"
+            echo ""
+        fi
+        pytest -v --cov=haveibeenpwned --cov-report=term-missing --cov-report=html
         ;;
     
     all)
-        echo -e "${BLUE}Running all tests...${NC}"
-        echo ""
-        
-        # Run unit tests first
-        run_tests "all-unit" "unit" "Unit Tests (Mocked)" || exit 1
-        
-        # Run integration tests
-        if [ -n "$HIBP_API_KEY" ]; then
-            run_tests "all-integration" "integration" "Integration Tests (Live API)" || exit 1
-        else
-            echo -e "${YELLOW}⚠ Skipping integration tests (no HIBP_API_KEY set)${NC}"
+        print_header "Running All Tests"
+        if [[ "$HAS_API_KEY" == "false" ]]; then
+            echo "⚠️  Note: Integration tests will be skipped without HIBP_API_KEY"
             echo ""
         fi
-        
-        echo -e "${GREEN}========================================${NC}"
-        echo -e "${GREEN}All tests completed successfully!${NC}"
-        echo -e "${GREEN}========================================${NC}"
+        pytest -v
         ;;
     
-    help|--help|-h)
-        echo "Usage: $0 [MODE]"
-        echo ""
-        echo "Modes:"
-        echo "  mock, unit       - Run unit tests with mocked API"
-        echo "  live, integration - Run integration tests with live API"
-        echo "  coverage, cov    - Run all tests with coverage report"
-        echo "  quick            - Run quick unit tests only"
-        echo "  all              - Run all tests (default)"
-        echo "  help             - Show this help message"
-        echo ""
-        echo "Examples:"
-        echo "  $0                  # Run all tests"
-        echo "  $0 mock             # Run unit tests only"
-        echo "  $0 live             # Run integration tests"
-        echo "  $0 coverage         # Generate coverage report"
-        echo ""
-        echo "Environment Variables:"
-        echo "  HIBP_API_KEY      - API key for live integration tests"
-        echo ""
-        exit 0
+    test_*|*.py)
+        print_header "Running Specific Test: $MODE"
+        TEST_FILE="tests/$MODE"
+        [[ ! "$MODE" =~ ^tests/ ]] || TEST_FILE="$MODE"
+        [[ "$TEST_FILE" =~ \.py$ ]] || TEST_FILE="${TEST_FILE}.py"
+        pytest "$TEST_FILE" -v
         ;;
     
     *)
-        echo -e "${RED}Error: Unknown mode '$MODE'${NC}"
-        echo "Run '$0 help' for usage information"
+        echo "❌ Unknown mode: $MODE"
+        echo ""
+        echo "Valid modes: unit, live, coverage, all, quick, or a test file name"
+        echo "Run './run_tests.sh --help' for more information"
         exit 1
         ;;
 esac
 
-exit 0
+EXIT_CODE=$?
+
+# Print summary
+echo ""
+echo "======================================================================"
+if [[ $EXIT_CODE -eq 0 ]]; then
+    echo "✅ All tests passed!"
+else
+    echo "❌ Tests failed with exit code $EXIT_CODE"
+fi
+
+if [[ "$MODE" == "coverage" || "$MODE" == "cov" ]]; then
+    echo ""
+    echo "📊 Coverage report generated: htmlcov/index.html"
+fi
+
+echo "======================================================================"
+echo ""
+
+exit $EXIT_CODE

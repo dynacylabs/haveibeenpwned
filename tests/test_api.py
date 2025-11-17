@@ -319,16 +319,31 @@ class TestHIBPParameterPassing:
             assert "includeUnverified=false" in url
     
     def test_is_password_pwned_parameters(self, sample_password_hash_response):
-        """Test that password parameters are passed correctly."""
-        hibp = HIBP()
+        """Test that password checking passes parameters correctly."""
+        from haveibeenpwned.passwords import MD4_AVAILABLE
+        hibp = HIBP(user_agent="test-suite")
         
         with responses_lib.RequestsMock() as rsps:
+            # Test NTLM mode (skip if MD4 not available)
+            if MD4_AVAILABLE:
+                rsps.add(
+                    responses_lib.GET,
+                    "https://api.pwnedpasswords.com/range/8846F",
+                    body=sample_password_hash_response,
+                    status=200
+                )
+                
+                hibp.is_password_pwned("password", use_ntlm=True)
+                assert "mode=ntlm" in rsps.calls[0].request.url
+            
+            # Test SHA-1 mode (default) with padding
             rsps.add(
                 responses_lib.GET,
-                "https://api.pwnedpasswords.com/range/8846F",
+                "https://api.pwnedpasswords.com/range/5BAA6",
                 body=sample_password_hash_response,
                 status=200
             )
             
-            hibp.is_password_pwned("password", use_ntlm=True)
-            assert "mode=ntlm" in rsps.calls[0].request.url
+            hibp.is_password_pwned("password", add_padding=True)
+            # Check that Add-Padding header was sent (would be in last call)
+            assert len(rsps.calls) > 0

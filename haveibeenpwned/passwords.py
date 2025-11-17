@@ -8,6 +8,14 @@ from typing import Dict, Optional
 from .client import BaseClient
 
 
+# Check if MD4 is available (required for NTLM hashes)
+try:
+    hashlib.new('md4')
+    MD4_AVAILABLE = True
+except (ValueError, AttributeError):
+    MD4_AVAILABLE = False
+
+
 class PwnedPasswordsAPI:
     """API methods for Pwned Passwords endpoints."""
     
@@ -35,6 +43,11 @@ class PwnedPasswordsAPI:
         """
         # Hash the password
         if use_ntlm:
+            if not MD4_AVAILABLE:
+                raise ValueError(
+                    "NTLM hashing requires MD4 support, which is not available in this Python installation. "
+                    "MD4 has been deprecated in Python 3.9+ and removed in some builds. Use SHA-1 instead."
+                )
             hash_obj = hashlib.new('md4', password.encode('utf-16le'))
         else:
             hash_obj = hashlib.sha1(password.encode('utf-8'))
@@ -96,8 +109,10 @@ class PwnedPasswordsAPI:
                 timeout=self.client.timeout,
             )
             
-            data = self.client._handle_response(response)
-            text = response.text if response.status_code == 200 else ""
+            # Pwned Passwords returns plain text, not JSON
+            if response.status_code != 200:
+                self.client._handle_response(response)  # This will raise appropriate errors
+            text = response.text
         else:
             response = self.client.session.get(
                 f"{self.client.PWNED_PASSWORDS_URL}/{endpoint}",
@@ -144,5 +159,13 @@ class PwnedPasswordsAPI:
             
         Returns:
             Uppercase NTLM hash
+            
+        Raises:
+            ValueError: If MD4 is not available
         """
+        if not MD4_AVAILABLE:
+            raise ValueError(
+                "NTLM hashing requires MD4 support, which is not available in this Python installation. "
+                "MD4 has been deprecated in Python 3.9+ and removed in some builds."
+            )
         return hashlib.new('md4', password.encode('utf-16le')).hexdigest().upper()

@@ -4,6 +4,7 @@ Tests for data models.
 
 import pytest
 from haveibeenpwned.models import Breach, Paste, Subscription, SubscribedDomain
+from tests.conftest import skip_if_no_api_key
 
 
 @pytest.mark.unit
@@ -178,3 +179,162 @@ class TestSubscribedDomainModel:
         
         assert domain_dict["DomainName"] == "example.com"
         assert domain_dict["PwnCount"] == 150
+
+
+@pytest.mark.integration
+class TestModelsWithLiveData:
+    """Test models with real API data."""
+    
+    def test_breach_model_with_live_data(self):
+        """Test Breach model with real API data."""
+        from haveibeenpwned import HIBP
+        
+        hibp = HIBP(user_agent="hibp-test-suite")
+        
+        # Get a real breach
+        breach = hibp.get_breach("Adobe")
+        
+        # Verify all expected attributes exist
+        assert breach.name == "Adobe"
+        assert breach.title is not None
+        assert breach.domain is not None
+        assert breach.breach_date is not None
+        assert breach.added_date is not None
+        assert breach.pwn_count > 0
+        assert breach.description is not None
+        assert len(breach.data_classes) > 0
+        assert isinstance(breach.is_verified, bool)
+        assert isinstance(breach.is_sensitive, bool)
+        
+        # Test to_dict works with live data
+        breach_dict = breach.to_dict()
+        assert breach_dict["Name"] == "Adobe"
+        assert "DataClasses" in breach_dict
+    
+    def test_breach_model_truncated_with_live_data(self):
+        """Test Breach model with truncated live data."""
+        from haveibeenpwned import HIBP
+        from tests.conftest import skip_if_no_api_key, TEST_ACCOUNT_EXISTS, LIVE_API_KEY
+        
+        # Skip if no API key
+        if LIVE_API_KEY == "00000000000000000000000000000000":
+            pytest.skip("No live API key provided")
+        
+        hibp = HIBP(api_key=LIVE_API_KEY, user_agent="hibp-test-suite")
+        
+        # Get truncated breach data (default)
+        breaches = hibp.get_account_breaches(TEST_ACCOUNT_EXISTS, truncate_response=True)
+        
+        if breaches:
+            breach = breaches[0]
+            assert breach.name is not None
+            # Truncated response has minimal data
+            assert breach.title == "" or breach.title is not None
+    
+    def test_paste_model_with_live_data(self):
+        """Test Paste model with real API data."""
+        from haveibeenpwned import HIBP
+        from tests.conftest import skip_if_no_api_key, TEST_ACCOUNT_EXISTS, LIVE_API_KEY
+        
+        # Skip if no API key
+        if LIVE_API_KEY == "00000000000000000000000000000000":
+            pytest.skip("No live API key provided")
+        
+        hibp = HIBP(api_key=LIVE_API_KEY, user_agent="hibp-test-suite")
+        
+        # Get pastes for test account
+        pastes = hibp.get_account_pastes(TEST_ACCOUNT_EXISTS)
+        
+        if pastes:
+            paste = pastes[0]
+            assert paste.source is not None
+            assert paste.id is not None
+            assert paste.email_count >= 0
+            
+            # Test to_dict works with live data
+            paste_dict = paste.to_dict()
+            assert "Source" in paste_dict
+            assert "Id" in paste_dict
+    
+    @skip_if_no_api_key()
+    def test_subscription_model_with_live_data(self):
+        """Test Subscription model with real API data."""
+        from haveibeenpwned import HIBP
+        from tests.conftest import LIVE_API_KEY
+        
+        hibp = HIBP(api_key=LIVE_API_KEY, user_agent="hibp-test-suite")
+        
+        # Get real subscription status
+        subscription = hibp.get_subscription_status()
+        
+        # Verify all expected attributes
+        assert subscription.subscription_name is not None
+        assert subscription.description is not None
+        assert subscription.rpm > 0
+        assert subscription.domain_search_max_breached_accounts >= 0
+        assert isinstance(subscription.includes_stealer_logs, bool)
+        
+        # Test to_dict works with live data
+        sub_dict = subscription.to_dict()
+        assert "SubscriptionName" in sub_dict
+        assert "Rpm" in sub_dict
+    
+    @skip_if_no_api_key()
+    def test_subscribed_domain_model_with_live_data(self):
+        """Test SubscribedDomain model with real API data."""
+        from haveibeenpwned import HIBP
+        from tests.conftest import LIVE_API_KEY
+        
+        hibp = HIBP(api_key=LIVE_API_KEY, user_agent="hibp-test-suite")
+        
+        # Get subscribed domains
+        domains = hibp.get_subscribed_domains()
+        
+        # If we have domains, test the model
+        if domains:
+            domain = domains[0]
+            assert domain.domain_name is not None
+            
+            # Test to_dict works with live data
+            domain_dict = domain.to_dict()
+            assert "DomainName" in domain_dict
+    
+    def test_all_breach_fields_parsed_from_live_data(self):
+        """Test that all breach fields are correctly parsed from live API."""
+        from haveibeenpwned import HIBP
+        
+        hibp = HIBP(user_agent="hibp-test-suite")
+        
+        # Get multiple breaches to test field variations
+        breaches = hibp.get_all_breaches()
+        
+        assert len(breaches) > 0
+        
+        # Test that critical fields exist on all breaches
+        for breach in breaches[:5]:  # Test first 5
+            assert hasattr(breach, 'name')
+            assert hasattr(breach, 'title')
+            assert hasattr(breach, 'domain')
+            assert hasattr(breach, 'breach_date')
+            assert hasattr(breach, 'pwn_count')
+            assert hasattr(breach, 'is_verified')
+            assert hasattr(breach, 'is_spam_list')
+            
+            # Verify types
+            assert isinstance(breach.name, str)
+            assert isinstance(breach.pwn_count, int)
+            assert isinstance(breach.is_verified, bool)
+    
+    def test_model_repr_with_live_data(self):
+        """Test that model __repr__ works with real data."""
+        from haveibeenpwned import HIBP
+        
+        hibp = HIBP(user_agent="hibp-test-suite")
+        
+        # Get a breach and test repr
+        breach = hibp.get_breach("Adobe")
+        repr_str = repr(breach)
+        
+        assert "Breach" in repr_str
+        assert "Adobe" in repr_str
+        assert str(breach.pwn_count) in repr_str
