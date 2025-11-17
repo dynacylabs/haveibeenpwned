@@ -211,14 +211,11 @@ class TestModelsWithLiveData:
         assert breach_dict["Name"] == "Adobe"
         assert "DataClasses" in breach_dict
     
+    @skip_if_no_api_key()
     def test_breach_model_truncated_with_live_data(self):
         """Test Breach model with truncated live data."""
         from haveibeenpwned import HIBP
-        from tests.conftest import skip_if_no_api_key, TEST_ACCOUNT_EXISTS, LIVE_API_KEY
-        
-        # Skip if no API key
-        if LIVE_API_KEY == "00000000000000000000000000000000":
-            pytest.skip("No live API key provided")
+        from tests.conftest import TEST_ACCOUNT_EXISTS, LIVE_API_KEY
         
         hibp = HIBP(api_key=LIVE_API_KEY, user_agent="hibp-test-suite")
         
@@ -231,14 +228,11 @@ class TestModelsWithLiveData:
             # Truncated response has minimal data
             assert breach.title == "" or breach.title is not None
     
+    @skip_if_no_api_key()
     def test_paste_model_with_live_data(self):
         """Test Paste model with real API data."""
         from haveibeenpwned import HIBP
-        from tests.conftest import skip_if_no_api_key, TEST_ACCOUNT_EXISTS, LIVE_API_KEY
-        
-        # Skip if no API key
-        if LIVE_API_KEY == "00000000000000000000000000000000":
-            pytest.skip("No live API key provided")
+        from tests.conftest import TEST_ACCOUNT_EXISTS, LIVE_API_KEY
         
         hibp = HIBP(api_key=LIVE_API_KEY, user_agent="hibp-test-suite")
         

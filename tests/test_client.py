@@ -341,6 +341,7 @@ class TestBaseClientLive:
         headers = client._get_headers(include_api_key=True)
         
         assert headers["User-Agent"] == "hibp-live-test"
+        assert "hibp-api-key" in headers
         assert headers["hibp-api-key"] == LIVE_API_KEY
     
     def test_live_url_encoding(self):
