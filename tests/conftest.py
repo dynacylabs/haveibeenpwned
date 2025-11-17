@@ -154,3 +154,10 @@ def skip_if_no_api_key(client_fixture_name="live_client"):
         LIVE_API_KEY == TEST_API_KEY,
         reason="No live API key provided (set HIBP_API_KEY environment variable)"
     )
+
+
+# Create a reusable skip marker
+requires_api_key = pytest.mark.skipif(
+    LIVE_API_KEY == TEST_API_KEY,
+    reason="No live API key provided (set HIBP_API_KEY environment variable)"
+)

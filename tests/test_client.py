@@ -16,7 +16,7 @@ from haveibeenpwned.exceptions import (
     ForbiddenError,
     ServiceUnavailableError,
 )
-from tests.conftest import skip_if_no_api_key
+from tests.conftest import requires_api_key
 
 
 @pytest.mark.unit
@@ -303,7 +303,7 @@ class TestBaseClientLive:
         assert len(breaches) > 0
         assert "Name" in breaches[0]
     
-    @skip_if_no_api_key()
+    @requires_api_key
     def test_live_request_with_api_key(self):
         """Test making a live request with API key."""
         from tests.conftest import LIVE_API_KEY, TEST_ACCOUNT_EXISTS
@@ -331,7 +331,7 @@ class TestBaseClientLive:
         assert len(response.text) > 0
         assert ":" in response.text  # Hash:count format
     
-    @skip_if_no_api_key()
+    @requires_api_key
     def test_live_headers_sent(self):
         """Test that correct headers are sent in live requests."""
         from tests.conftest import LIVE_API_KEY
@@ -364,7 +364,7 @@ class TestBaseClientLive:
         with pytest.raises(NotFoundError):
             client.get("breach/ThisBreachDefinitelyDoesNotExist123456", include_api_key=False)
     
-    @skip_if_no_api_key()
+    @requires_api_key
     def test_live_authentication_with_invalid_key(self):
         """Test authentication failure with invalid API key."""
         from haveibeenpwned.exceptions import AuthenticationError

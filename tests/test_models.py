@@ -4,7 +4,7 @@ Tests for data models.
 
 import pytest
 from haveibeenpwned.models import Breach, Paste, Subscription, SubscribedDomain
-from tests.conftest import skip_if_no_api_key
+from tests.conftest import requires_api_key
 
 
 @pytest.mark.unit
@@ -211,7 +211,7 @@ class TestModelsWithLiveData:
         assert breach_dict["Name"] == "Adobe"
         assert "DataClasses" in breach_dict
     
-    @skip_if_no_api_key()
+    @requires_api_key
     def test_breach_model_truncated_with_live_data(self):
         """Test Breach model with truncated live data."""
         from haveibeenpwned import HIBP
@@ -228,7 +228,7 @@ class TestModelsWithLiveData:
             # Truncated response has minimal data
             assert breach.title == "" or breach.title is not None
     
-    @skip_if_no_api_key()
+    @requires_api_key
     def test_paste_model_with_live_data(self):
         """Test Paste model with real API data."""
         from haveibeenpwned import HIBP
@@ -250,7 +250,7 @@ class TestModelsWithLiveData:
             assert "Source" in paste_dict
             assert "Id" in paste_dict
     
-    @skip_if_no_api_key()
+    @requires_api_key
     def test_subscription_model_with_live_data(self):
         """Test Subscription model with real API data."""
         from haveibeenpwned import HIBP
@@ -273,7 +273,7 @@ class TestModelsWithLiveData:
         assert "SubscriptionName" in sub_dict
         assert "Rpm" in sub_dict
     
-    @skip_if_no_api_key()
+    @requires_api_key
     def test_subscribed_domain_model_with_live_data(self):
         """Test SubscribedDomain model with real API data."""
         from haveibeenpwned import HIBP

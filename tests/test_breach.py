@@ -9,7 +9,13 @@ from haveibeenpwned.breach import BreachAPI
 from haveibeenpwned.client import BaseClient
 from haveibeenpwned.models import Breach, SubscribedDomain
 from haveibeenpwned.exceptions import NotFoundError
-from tests.conftest import TEST_ACCOUNT_EXISTS, TEST_ACCOUNT_NOT_FOUND, skip_if_no_api_key
+from tests.conftest import (
+    TEST_API_KEY,
+    TEST_ACCOUNT_EXISTS,
+    TEST_ACCOUNT_NOT_FOUND,
+    TEST_ACCOUNT_SPAM,
+    requires_api_key,
+)
 
 
 @pytest.mark.unit
@@ -289,7 +295,7 @@ class TestBreachAPIMocked:
 
 
 @pytest.mark.integration
-@skip_if_no_api_key()
+@requires_api_key
 class TestBreachAPILive:
     """Test BreachAPI with live API (requires HIBP_API_KEY env var)."""
     

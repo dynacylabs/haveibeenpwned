@@ -10,7 +10,13 @@ from haveibeenpwned.stealer_logs import StealerLogsAPI
 from haveibeenpwned.subscription import SubscriptionAPI
 from haveibeenpwned.client import BaseClient
 from haveibeenpwned.models import Paste, Subscription
-from tests.conftest import TEST_ACCOUNT_EXISTS, skip_if_no_api_key
+from tests.conftest import (
+    TEST_API_KEY,
+    TEST_ACCOUNT_EXISTS,
+    TEST_ACCOUNT_STEALER,
+    TEST_ACCOUNT_NOT_FOUND,
+    requires_api_key,
+)
 
 
 @pytest.mark.unit
@@ -180,7 +186,7 @@ class TestSubscriptionAPIMocked:
 
 
 @pytest.mark.integration
-@skip_if_no_api_key()
+@requires_api_key
 class TestPastesAPILive:
     """Test PastesAPI with live API."""
     
@@ -195,7 +201,7 @@ class TestPastesAPILive:
 
 @pytest.mark.integration
 @pytest.mark.slow
-@skip_if_no_api_key()
+@requires_api_key
 class TestStealerLogsAPILive:
     """Test StealerLogsAPI with live API (requires Pwned 5+ subscription)."""
     
@@ -212,7 +218,7 @@ class TestStealerLogsAPILive:
 
 
 @pytest.mark.integration
-@skip_if_no_api_key()
+@requires_api_key
 class TestSubscriptionAPILive:
     """Test SubscriptionAPI with live API."""
     

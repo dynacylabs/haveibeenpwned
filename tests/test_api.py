@@ -7,7 +7,12 @@ import responses as responses_lib
 
 from haveibeenpwned import HIBP
 from haveibeenpwned.models import Breach, Paste, Subscription, SubscribedDomain
-from tests.conftest import TEST_ACCOUNT_EXISTS, skip_if_no_api_key
+from tests.conftest import (
+    TEST_API_KEY,
+    TEST_ACCOUNT_EXISTS,
+    TEST_ACCOUNT_NOT_FOUND,
+    requires_api_key,
+)
 
 
 @pytest.mark.unit
@@ -270,7 +275,7 @@ class TestHIBPLive:
         count = hibp.is_password_pwned("password")
         assert count > 0
     
-    @skip_if_no_api_key()
+    @requires_api_key
     def test_breach_check_with_api_key(self, live_client):
         """Test breach checking with API key."""
         breaches = live_client.get_account_breaches(TEST_ACCOUNT_EXISTS)
