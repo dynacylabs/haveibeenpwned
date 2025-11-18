@@ -68,7 +68,7 @@ case "$MODE" in
             echo "⚠️  Note: Integration tests will be skipped without HIBP_API_KEY"
             echo ""
         fi
-        pytest -v --cov=hibp --cov-report=term-missing --cov-report=html
+        pytest -v --cov=haveibeenpwned --cov-report=term-missing --cov-report=html --cov-fail-under=90
         ;;
     
     all)
