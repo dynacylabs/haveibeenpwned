@@ -40,10 +40,10 @@ jobs:
       run: |
         if [ -n "$HIBP_API_KEY" ]; then
           echo "Running all tests including live API tests..."
-          pytest tests/ -v --cov=hibp --cov-report=term-missing --cov-report=xml --cov-report=html
+          pytest tests/ -v --cov=haveibeenpwned --cov-report=term-missing --cov-report=xml --cov-report=html
         else
           echo "Secrets not configured, running mock tests only..."
-          pytest tests/ -v --cov=hibp --cov-report=term-missing --cov-report=xml --cov-report=html
+          pytest tests/ -v --cov=haveibeenpwned --cov-report=term-missing --cov-report=xml --cov-report=html
         fi
     
     - name: Check coverage threshold
@@ -88,10 +88,10 @@ jobs:
     
     - name: Lint with ruff
       run: |
-        ruff check hibp/ --output-format=github
+        ruff check haveibeenpwned/ --output-format=github
       continue-on-error: true
     
     - name: Type check with mypy
       run: |
-        mypy hibp/ --ignore-missing-imports
+        mypy haveibeenpwned/ --ignore-missing-imports
       continue-on-error: true
