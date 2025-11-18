@@ -5,8 +5,8 @@ import hashlib
 import pytest
 import responses as responses_lib
 
-from hibp.passwords import PwnedPasswordsAPI, MD4_AVAILABLE
-from hibp.client import BaseClient
+from haveibeenpwned.passwords import PwnedPasswordsAPI, MD4_AVAILABLE
+from haveibeenpwned.client import BaseClient
 
 # Skip NTLM tests if MD4 is not available
 requires_md4 = pytest.mark.skipif(

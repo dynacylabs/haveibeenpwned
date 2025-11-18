@@ -5,11 +5,11 @@ Tests for pastes, stealer logs, and subscription APIs.
 import pytest
 import responses as responses_lib
 
-from hibp.pastes import PastesAPI
-from hibp.stealer_logs import StealerLogsAPI
-from hibp.subscription import SubscriptionAPI
-from hibp.client import BaseClient
-from hibp.models import Paste, Subscription
+from haveibeenpwned.pastes import PastesAPI
+from haveibeenpwned.stealer_logs import StealerLogsAPI
+from haveibeenpwned.subscription import SubscriptionAPI
+from haveibeenpwned.client import BaseClient
+from haveibeenpwned.models import Paste, Subscription
 from tests.conftest import (
     TEST_API_KEY,
     TEST_ACCOUNT_EXISTS,

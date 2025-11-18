@@ -1,82 +1,183 @@
-# HIBP - Have I Been Pwned Python Client
+# Have I Been Pwned - Python Library
 
-A comprehensive Python library for the [Have I Been Pwned](https://haveibeenpwned.com/) API v3. This library provides easy access to all HIBP API endpoints including breach data, pastes, stealer logs, and Pwned Passwords.
-
-[![PyPI version](https://badge.fury.io/py/hibp.svg)](https://badge.fury.io/py/hibp)
-[![Python Support](https://img.shields.io/pypi/pyversions/hibp.svg)](https://pypi.org/project/hibp/)
+[![PyPI version](https://badge.fury.io/py/haveibeenpwned-py.svg)](https://badge.fury.io/py/haveibeenpwned-py)
+[![Python Support](https://img.shields.io/pypi/pyversions/haveibeenpwned-py.svg)](https://pypi.org/project/haveibeenpwned-py/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Features
+A comprehensive, easy-to-use Python library for the [Have I Been Pwned](https://haveibeenpwned.com/) API v3. Check if email accounts have been compromised in data breaches, validate password security, and access paste and stealer log data - all through a clean, Pythonic interface.
 
-- **Complete API Coverage**: All HIBP v3 endpoints supported
-- **Pwned Passwords**: Check passwords using k-Anonymity (no API key needed)
-- **Breach Data**: Search for breached accounts, get breach details
-- **Pastes**: Find paste exposures for email addresses
-- **Stealer Logs**: Access stealer log data (requires Pwned 5+ subscription)
-- **Domain Search**: Search for breaches across verified domains
-- **Type Safety**: Full type hints for better IDE support
-- **Error Handling**: Comprehensive exception hierarchy
-- **Rate Limiting**: Automatic handling of rate limit responses
+## ✨ Features
 
-## Table of Contents
+- 🔐 **Pwned Passwords**: Check passwords using k-Anonymity (no API key needed)
+- 📧 **Breach Data**: Search breached accounts and get detailed breach information
+- 📋 **Pastes**: Find paste exposures for email addresses
+- 🎯 **Stealer Logs**: Access malware-captured credentials (Pwned 5+ subscription)
+- 🏢 **Domain Search**: Search breaches across verified domains
+- 🛡️ **Type Safety**: Full type hints for better IDE support and code quality
+- ⚡ **Error Handling**: Comprehensive exception hierarchy for robust error management
+- 🚦 **Rate Limiting**: Automatic handling of API rate limits
 
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-- [Usage Examples](#usage-examples)
-  - [Breaches](#breaches)
-  - [Domain Search](#domain-search)
-  - [Pastes](#pastes)
-  - [Stealer Logs](#stealer-logs)
-  - [Pwned Passwords](#pwned-passwords)
-  - [Subscription Status](#subscription-status)
-- [Advanced Usage](#advanced-usage)
-- [Error Handling](#error-handling)
-- [Models](#models)
-- [Testing](#testing)
-- [Contributing](#contributing)
-- [API Reference](#api-reference)
-- [Requirements](#requirements)
-- [License](#license)
+## 📚 Documentation
 
-## Installation
+- **[Installation Guide](INSTALL.md)** - How to install and configure the library
+- **[Usage Guide](USAGE.md)** - Comprehensive usage examples and API reference
+- **[Contributing Guide](CONTRIBUTING.md)** - How to contribute to the project
+- **[Development Guide](DEVELOPMENT.md)** - Development setup and testing
+
+## 🚀 Quick Start
+
+### Installation
 
 ```bash
-pip install hibp
+pip install haveibeenpwned-py
 ```
 
-Or install from source:
+[Full installation instructions →](INSTALL.md)
 
-```bash
-git clone https://github.com/dynacylabs/hibp.git
-cd hibp
-pip install -e .
-```
-
-## Quick Start
-
-### Simple Interface
-
-The easiest way to use the library is through the `HIBP` class:
+### Simple Example
 
 ```python
-from hibp import HIBP
+from haveibeenpwned import HIBP
 
-# Initialize with your API key (get one at https://haveibeenpwned.com/API/Key)
+# Check if an account has been breached (requires API key)
 hibp = HIBP(api_key="your-api-key-here")
-
-# Check if an account has been breached
 breaches = hibp.get_account_breaches("test@example.com")
 for breach in breaches:
-    print(f"{breach.name}: {breach.pwn_count} accounts affected")
+    print(f"🚨 {breach.name}: {breach.pwn_count:,} accounts affected")
 
-# Check if a password has been pwned (no API key needed)
-hibp_free = HIBP()  # No API key needed for passwords
-count = hibp_free.is_password_pwned("password123")
+# Check if a password has been pwned (no API key required!)
+hibp_passwords = HIBP()
+count = hibp_passwords.is_password_pwned("password123")
 if count > 0:
-    print(f"Password found in {count} breaches!")
+    print(f"⚠️  Password found in {count:,} breaches!")
 else:
-    print("Password not found in breaches")
+    print("✓ Password not found in any breaches")
 ```
+
+[More examples and detailed usage →](USAGE.md)
+
+## 📖 API Endpoints
+
+This library provides complete coverage of all HIBP API v3 endpoints:
+
+### Breaches API (7 endpoints)
+- ✅ Check account breaches
+- ✅ Get all breaches
+- ✅ Get single breach details
+- ✅ Get latest breach
+- ✅ Get data classes
+- ✅ Get domain breaches (requires verification)
+- ✅ Get subscribed domains
+
+### Pastes API
+- ✅ Get pastes for an account
+
+### Stealer Logs API (Pwned 5+ subscription)
+- ✅ Get stealer logs by email
+- ✅ Get stealer logs by website
+- ✅ Get stealer logs by email domain
+
+### Subscription API
+- ✅ Get subscription status
+
+### Pwned Passwords API (no API key required)
+- ✅ Check password by plaintext
+- ✅ Search by hash prefix (k-Anonymity)
+- ✅ SHA-1 and NTLM hash support
+
+## 🔑 API Key
+
+Most endpoints require an API key from Have I Been Pwned. The **Pwned Passwords API does not require authentication**.
+
+**Get your API key:** https://haveibeenpwned.com/API/Key
+
+**Test API key for development:** `00000000000000000000000000000000`
+
+[Learn more about API key setup →](INSTALL.md#api-key-setup)
+
+## 🏗️ Project Structure
+
+```
+haveibeenpwned/
+├── haveibeenpwned/          # Main package
+│   ├── api.py               # Main HIBP interface
+│   ├── breach.py            # Breach endpoints
+│   ├── client.py            # HTTP client
+│   ├── exceptions.py        # Custom exceptions
+│   ├── models.py            # Data models
+│   ├── passwords.py         # Pwned Passwords API
+│   ├── pastes.py            # Pastes endpoints
+│   ├── stealer_logs.py      # Stealer logs endpoints
+│   └── subscription.py      # Subscription endpoints
+├── tests/                   # Comprehensive test suite
+├── docs/                    # Documentation
+│   ├── INSTALL.md           # Installation guide
+│   ├── USAGE.md             # Usage guide
+│   ├── CONTRIBUTING.md      # Contributing guide
+│   └── DEVELOPMENT.md       # Development guide
+└── README.md                # This file
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! This project maintains high standards:
+
+- ✅ **Test Coverage**: >95% required
+- ✅ **Type Hints**: Full type annotations
+- ✅ **Documentation**: Comprehensive docs and examples
+- ✅ **Code Quality**: Follows PEP 8 and best practices
+
+[Read the contributing guide →](CONTRIBUTING.md)
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+./run_tests.sh all
+
+# Run unit tests only (fast, no API key needed)
+./run_tests.sh unit
+
+# Run integration tests (requires HIBP_API_KEY)
+export HIBP_API_KEY="your-api-key"
+./run_tests.sh live
+
+# Check coverage
+./run_tests.sh coverage
+```
+
+[Learn more about testing →](DEVELOPMENT.md#testing)
+
+## 📋 Requirements
+
+- Python 3.8 or higher
+- requests >= 2.25.0
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Attribution
+
+This library uses the [Have I Been Pwned API](https://haveibeenpwned.com/API/v3). When using this library, you must provide clear attribution to Have I Been Pwned as required by their [Terms of Service](https://haveibeenpwned.com/API/v3#AcceptableUse).
+
+The breach and paste data is licensed under [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/).
+
+## ⚠️ Disclaimer
+
+This is an unofficial library and is not affiliated with Troy Hunt or Have I Been Pwned. Use responsibly and in accordance with the [HIBP Acceptable Use Policy](https://haveibeenpwned.com/API/v3#AcceptableUse).
+
+## 🔗 Resources
+
+- **Website**: [Have I Been Pwned](https://haveibeenpwned.com/)
+- **API Documentation**: [HIBP API v3](https://haveibeenpwned.com/API/v3)
+- **Get API Key**: [Purchase API Access](https://haveibeenpwned.com/API/Key)
+- **PyPI Package**: [haveibeenpwned-py](https://pypi.org/project/haveibeenpwned-py/)
+- **GitHub Repository**: [dynacylabs/haveibeenpwned](https://github.com/dynacylabs/haveibeenpwned)
+
+---
+
+**Made with ❤️ for security and privacy**
 
 ## Usage Examples
 
@@ -235,7 +336,7 @@ print(f"Valid until: {subscription.subscribed_until}")
 You can also access the API modules directly for more control:
 
 ```python
-from hibp import HIBP
+from haveibeenpwned import HIBP
 
 hibp = HIBP(api_key="your-api-key")
 
@@ -269,7 +370,7 @@ hibp = HIBP(
 The library provides detailed exceptions for different error scenarios:
 
 ```python
-from hibp import (
+from haveibeenpwned import (
     HIBP,
     NotFoundError,
     RateLimitError,
@@ -359,7 +460,7 @@ subscription.includes_stealer_logs            # False
 The API enforces rate limits based on your subscription level. When rate limited:
 
 ```python
-from hibp import RateLimitError
+from haveibeenpwned import RateLimitError
 
 try:
     breaches = hibp.get_account_breaches("test@example.com")
@@ -482,9 +583,9 @@ For the initial release, PyPI Trusted Publishing must be configured:
 2. **Set up Trusted Publishing**:
    - Go to https://pypi.org/manage/account/publishing/
    - Add a new publisher:
-     - PyPI Project Name: `hibp`
+     - PyPI Project Name: `haveibeenpwned-py`
      - Owner: `dynacylabs`
-     - Repository: `hibp`
+     - Repository: `haveibeenpwned`
      - Workflow: `publish.yml`
      - Environment name: `pypi`
    - Click "Add"
@@ -572,7 +673,7 @@ breaches = hibp.get_account_breaches("stealer-log@hibp-integration-tests.com")
 The API enforces rate limits based on your subscription level. When rate limited:
 
 ```python
-from hibp import RateLimitError
+from haveibeenpwned import RateLimitError
 
 try:
     breaches = hibp.get_account_breaches("test@example.com")
@@ -634,8 +735,8 @@ This is an unofficial library and is not affiliated with Troy Hunt or Have I Bee
 - [Have I Been Pwned Website](https://haveibeenpwned.com/)
 - [HIBP API Documentation](https://haveibeenpwned.com/API/v3)
 - [Get an API Key](https://haveibeenpwned.com/API/Key)
-- [PyPI Package](https://pypi.org/project/hibp/)
-- [GitHub Repository](https://github.com/dynacylabs/hibp)
+- [PyPI Package](https://pypi.org/project/haveibeenpwned-py/)
+- [GitHub Repository](https://github.com/dynacylabs/haveibeenpwned)
 
 ## Project Structure
 

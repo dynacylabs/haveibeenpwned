@@ -3,7 +3,7 @@ Tests for data models.
 """
 
 import pytest
-from hibp.models import Breach, Paste, Subscription, SubscribedDomain
+from haveibeenpwned.models import Breach, Paste, Subscription, SubscribedDomain
 from tests.conftest import requires_api_key
 
 
@@ -187,7 +187,7 @@ class TestModelsWithLiveData:
     
     def test_breach_model_with_live_data(self):
         """Test Breach model with real API data."""
-        from hibp import HIBP
+        from haveibeenpwned import HIBP
         
         hibp = HIBP(user_agent="hibp-test-suite")
         
@@ -214,7 +214,7 @@ class TestModelsWithLiveData:
     @requires_api_key
     def test_breach_model_truncated_with_live_data(self):
         """Test Breach model with truncated live data."""
-        from hibp import HIBP
+        from haveibeenpwned import HIBP
         from tests.conftest import TEST_ACCOUNT_EXISTS, LIVE_API_KEY
         
         hibp = HIBP(api_key=LIVE_API_KEY, user_agent="hibp-test-suite")
@@ -231,7 +231,7 @@ class TestModelsWithLiveData:
     @requires_api_key
     def test_paste_model_with_live_data(self):
         """Test Paste model with real API data."""
-        from hibp import HIBP
+        from haveibeenpwned import HIBP
         from tests.conftest import TEST_ACCOUNT_EXISTS, LIVE_API_KEY
         
         hibp = HIBP(api_key=LIVE_API_KEY, user_agent="hibp-test-suite")
@@ -253,7 +253,7 @@ class TestModelsWithLiveData:
     @requires_api_key
     def test_subscription_model_with_live_data(self):
         """Test Subscription model with real API data."""
-        from hibp import HIBP
+        from haveibeenpwned import HIBP
         from tests.conftest import LIVE_API_KEY
         
         hibp = HIBP(api_key=LIVE_API_KEY, user_agent="hibp-test-suite")
@@ -276,7 +276,7 @@ class TestModelsWithLiveData:
     @requires_api_key
     def test_subscribed_domain_model_with_live_data(self):
         """Test SubscribedDomain model with real API data."""
-        from hibp import HIBP
+        from haveibeenpwned import HIBP
         from tests.conftest import LIVE_API_KEY
         
         hibp = HIBP(api_key=LIVE_API_KEY, user_agent="hibp-test-suite")
@@ -295,7 +295,7 @@ class TestModelsWithLiveData:
     
     def test_all_breach_fields_parsed_from_live_data(self):
         """Test that all breach fields are correctly parsed from live API."""
-        from hibp import HIBP
+        from haveibeenpwned import HIBP
         
         hibp = HIBP(user_agent="hibp-test-suite")
         
@@ -321,7 +321,7 @@ class TestModelsWithLiveData:
     
     def test_model_repr_with_live_data(self):
         """Test that model __repr__ works with real data."""
-        from hibp import HIBP
+        from haveibeenpwned import HIBP
         
         hibp = HIBP(user_agent="hibp-test-suite")
         
