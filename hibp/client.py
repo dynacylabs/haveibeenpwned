@@ -28,7 +28,7 @@ class BaseClient:
     def __init__(
         self,
         api_key: Optional[str] = None,
-        user_agent: str = "haveibeenpwned-python-client",
+        user_agent: str = "hibp-python-client",
         timeout: int = 30,
     ):
         """

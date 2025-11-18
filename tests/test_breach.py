@@ -5,10 +5,10 @@ Tests for breach API endpoints.
 import pytest
 import responses as responses_lib
 
-from haveibeenpwned.breach import BreachAPI
-from haveibeenpwned.client import BaseClient
-from haveibeenpwned.models import Breach, SubscribedDomain
-from haveibeenpwned.exceptions import NotFoundError
+from hibp.breach import BreachAPI
+from hibp.client import BaseClient
+from hibp.models import Breach, SubscribedDomain
+from hibp.exceptions import NotFoundError
 from tests.conftest import (
     TEST_API_KEY,
     TEST_ACCOUNT_EXISTS,

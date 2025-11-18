@@ -5,8 +5,8 @@ Tests for the main HIBP API interface.
 import pytest
 import responses as responses_lib
 
-from haveibeenpwned import HIBP
-from haveibeenpwned.models import Breach, Paste, Subscription, SubscribedDomain
+from hibp import HIBP
+from hibp.models import Breach, Paste, Subscription, SubscribedDomain
 from tests.conftest import (
     TEST_API_KEY,
     TEST_ACCOUNT_EXISTS,

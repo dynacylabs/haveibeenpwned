@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Test runner script for the haveibeenpwned library.
+# Test runner script for the hibp library.
 #
 # Usage:
 #     ./run_tests.sh              # Run all tests
@@ -68,7 +68,7 @@ case "$MODE" in
             echo "⚠️  Note: Integration tests will be skipped without HIBP_API_KEY"
             echo ""
         fi
-        pytest -v --cov=haveibeenpwned --cov-report=term-missing --cov-report=html
+        pytest -v --cov=hibp --cov-report=term-missing --cov-report=html
         ;;
     
     all)

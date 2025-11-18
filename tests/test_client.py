@@ -6,8 +6,8 @@ import pytest
 import responses as responses_lib
 from requests.exceptions import Timeout, RequestException
 
-from haveibeenpwned.client import BaseClient
-from haveibeenpwned.exceptions import (
+from hibp.client import BaseClient
+from hibp.exceptions import (
     HIBPError,
     AuthenticationError,
     BadRequestError,

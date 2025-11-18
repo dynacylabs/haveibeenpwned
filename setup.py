@@ -4,13 +4,13 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="haveibeenpwned",
+    name="hibp",
     version="1.0.0",
     author="HaveIBeenPwned API Client",
     description="Python client library for the Have I Been Pwned API",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/haveibeenpwned",
+    url="https://github.com/dynacylabs/hibp",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",

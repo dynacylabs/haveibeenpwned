@@ -1,5 +1,5 @@
 [run]
-source = haveibeenpwned
+source = hibp
 omit = 
     */tests/*
     */test_*.py

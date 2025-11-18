@@ -1,6 +1,10 @@
-# Have I Been Pwned Python Client
+# HIBP - Have I Been Pwned Python Client
 
 A comprehensive Python library for the [Have I Been Pwned](https://haveibeenpwned.com/) API v3. This library provides easy access to all HIBP API endpoints including breach data, pastes, stealer logs, and Pwned Passwords.
+
+[![PyPI version](https://badge.fury.io/py/hibp.svg)](https://badge.fury.io/py/hibp)
+[![Python Support](https://img.shields.io/pypi/pyversions/hibp.svg)](https://pypi.org/project/hibp/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Features
 
@@ -37,14 +41,14 @@ A comprehensive Python library for the [Have I Been Pwned](https://haveibeenpwne
 ## Installation
 
 ```bash
-pip install haveibeenpwned
+pip install hibp
 ```
 
 Or install from source:
 
 ```bash
-git clone https://github.com/yourusername/haveibeenpwned.git
-cd haveibeenpwned
+git clone https://github.com/dynacylabs/hibp.git
+cd hibp
 pip install -e .
 ```
 
@@ -55,7 +59,7 @@ pip install -e .
 The easiest way to use the library is through the `HIBP` class:
 
 ```python
-from haveibeenpwned import HIBP
+from hibp import HIBP
 
 # Initialize with your API key (get one at https://haveibeenpwned.com/API/Key)
 hibp = HIBP(api_key="your-api-key-here")
@@ -231,7 +235,7 @@ print(f"Valid until: {subscription.subscribed_until}")
 You can also access the API modules directly for more control:
 
 ```python
-from haveibeenpwned import HIBP
+from hibp import HIBP
 
 hibp = HIBP(api_key="your-api-key")
 
@@ -265,7 +269,7 @@ hibp = HIBP(
 The library provides detailed exceptions for different error scenarios:
 
 ```python
-from haveibeenpwned import (
+from hibp import (
     HIBP,
     NotFoundError,
     RateLimitError,
@@ -355,7 +359,7 @@ subscription.includes_stealer_logs            # False
 The API enforces rate limits based on your subscription level. When rate limited:
 
 ```python
-from haveibeenpwned import RateLimitError
+from hibp import RateLimitError
 
 try:
     breaches = hibp.get_account_breaches("test@example.com")
@@ -389,7 +393,7 @@ breaches = hibp.get_account_breaches("stealer-log@hibp-integration-tests.com")
 
 ## Requirements
 
-- Python 3.7+
+- Python 3.8+
 - requests >= 2.25.0
 
 ## License
@@ -442,6 +446,79 @@ The test suite includes:
 
 Target coverage: **90%+**
 
+## Publishing & Releases
+
+This package uses GitHub Actions for automated publishing to PyPI via Trusted Publishing.
+
+### For Maintainers: Making a Release
+
+Once PyPI Trusted Publishing is configured, releases are simple:
+
+```bash
+# Using the release script (recommended)
+./release.sh 1.0.1
+
+# Or manually:
+# 1. Update version in setup.py
+# 2. Commit: git commit -am "Bump version to 1.0.1"
+# 3. Tag: git tag -a v1.0.1 -m "Release 1.0.1"
+# 4. Push: git push origin main --tags
+# 5. Create GitHub release (triggers auto-publish to PyPI)
+```
+
+The GitHub Actions workflow will automatically:
+- ✅ Build the package
+- ✅ Run tests
+- ✅ Publish to PyPI (with required approval via the `pypi` environment)
+
+### First-Time PyPI Setup
+
+For the initial release, PyPI Trusted Publishing must be configured:
+
+1. **Create PyPI account** (if needed):
+   - Go to https://pypi.org/account/register/
+   - Enable 2FA: https://pypi.org/manage/account/
+
+2. **Set up Trusted Publishing**:
+   - Go to https://pypi.org/manage/account/publishing/
+   - Add a new publisher:
+     - PyPI Project Name: `hibp`
+     - Owner: `dynacylabs`
+     - Repository: `hibp`
+     - Workflow: `publish.yml`
+     - Environment name: `pypi`
+   - Click "Add"
+
+3. **Configure GitHub Environment Protection**:
+   - Go to your GitHub repo → Settings → Environments
+   - Create environment: `pypi`
+   - Add required reviewers (for approval before publishing)
+   - Save protection rules
+
+4. **Make your first release**:
+   ```bash
+   ./release.sh 1.0.0
+   ```
+
+### Version Numbering
+
+Follow [Semantic Versioning](https://semver.org/):
+- **MAJOR** (1.0.0 → 2.0.0): Breaking changes
+- **MINOR** (1.0.0 → 1.1.0): New features, backward compatible
+- **PATCH** (1.0.0 → 1.0.1): Bug fixes, backward compatible
+
+### Release Checklist
+
+Before releasing:
+- [ ] All tests pass: `./run_tests.sh all`
+- [ ] Coverage is >90%: `./run_tests.sh coverage`
+- [ ] README.md is up-to-date
+- [ ] Version number updated in `setup.py`
+- [ ] CHANGELOG or release notes prepared
+- [ ] No uncommitted changes
+
+Target coverage: **90%+**
+
 ## API Reference
 
 ### Complete Endpoint Coverage
@@ -470,37 +547,41 @@ Target coverage: **90%+**
 - `is_password_pwned(password)` - Check if password is compromised
 - `search_password_hashes(prefix)` - Search by hash prefix
 
-### Project Structure
+### API Key
 
+Most endpoints require an API key. You can obtain one from:
+https://haveibeenpwned.com/API/Key
+
+The Pwned Passwords API does not require an API key.
+
+#### Test API Key
+
+For testing, you can use the test API key `00000000000000000000000000000000` with test accounts:
+
+```python
+hibp = HIBP(api_key="00000000000000000000000000000000")
+
+# These test accounts work with the test key
+breaches = hibp.get_account_breaches("account-exists@hibp-integration-tests.com")
+breaches = hibp.get_account_breaches("spam-list-only@hibp-integration-tests.com")
+breaches = hibp.get_account_breaches("stealer-log@hibp-integration-tests.com")
 ```
-haveibeenpwned/
-├── haveibeenpwned/          # Main package
-│   ├── __init__.py          # Package exports
-│   ├── api.py               # Main HIBP interface
-│   ├── breach.py            # Breach endpoints
-│   ├── client.py            # HTTP client
-│   ├── exceptions.py        # Custom exceptions
-│   ├── models.py            # Data models
-│   ├── passwords.py         # Pwned Passwords API
-│   ├── pastes.py            # Pastes endpoints
-│   ├── stealer_logs.py      # Stealer logs endpoints
-│   └── subscription.py      # Subscription endpoints
-├── examples/                # Usage examples
-│   ├── basic_usage.py
-│   ├── complete_demo.py
-│   └── password_checking.py
-├── tests/                   # Test suite
-│   ├── conftest.py
-│   ├── test_api.py
-│   ├── test_breach.py
-│   ├── test_client.py
-│   ├── test_models.py
-│   ├── test_other_endpoints.py
-│   └── test_passwords.py
-├── setup.py                 # Package setup
-├── requirements.txt         # Dependencies
-├── requirements-test.txt    # Test dependencies
-└── README.md                # This file
+
+## Rate Limiting
+
+The API enforces rate limits based on your subscription level. When rate limited:
+
+```python
+from hibp import RateLimitError
+
+try:
+    breaches = hibp.get_account_breaches("test@example.com")
+except RateLimitError as e:
+    # Wait for the specified time
+    import time
+    time.sleep(e.retry_after)
+    # Retry the request
+    breaches = hibp.get_account_breaches("test@example.com")
 ```
 
 ## Contributing
@@ -553,3 +634,46 @@ This is an unofficial library and is not affiliated with Troy Hunt or Have I Bee
 - [Have I Been Pwned Website](https://haveibeenpwned.com/)
 - [HIBP API Documentation](https://haveibeenpwned.com/API/v3)
 - [Get an API Key](https://haveibeenpwned.com/API/Key)
+- [PyPI Package](https://pypi.org/project/hibp/)
+- [GitHub Repository](https://github.com/dynacylabs/hibp)
+
+## Project Structure
+
+```
+hibp/
+├── hibp/                    # Main package
+│   ├── __init__.py          # Package exports
+│   ├── api.py               # Main HIBP interface
+│   ├── breach.py            # Breach endpoints
+│   ├── client.py            # HTTP client
+│   ├── exceptions.py        # Custom exceptions
+│   ├── models.py            # Data models
+│   ├── passwords.py         # Pwned Passwords API
+│   ├── pastes.py            # Pastes endpoints
+│   ├── stealer_logs.py      # Stealer logs endpoints
+│   └── subscription.py      # Subscription endpoints
+├── tests/                   # Test suite
+│   ├── conftest.py
+│   ├── test_api.py
+│   ├── test_breach.py
+│   ├── test_client.py
+│   ├── test_models.py
+│   ├── test_other_endpoints.py
+│   └── test_passwords.py
+├── .github/
+│   ├── workflows/
+│   │   ├── tests.yml              # Automated testing
+│   │   ├── publish.yml            # PyPI publishing
+│   │   ├── security.yml           # Security scanning
+│   │   └── dependency-updates.yml # Dependency monitoring
+│   └── dependabot.yml             # Automated dependency updates
+├── setup.py                 # Package setup
+├── requirements.txt         # Dependencies
+├── release.sh               # Automated release script
+├── run_tests.sh             # Test runner
+└── README.md                # This file
+```
+
+---
+
+**Made with ❤️ for security and privacy**
