@@ -62,7 +62,7 @@ jobs:
     
     - name: Upload coverage HTML
       if: matrix.python-version == '3.12' && always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: coverage-report
         path: htmlcov/
